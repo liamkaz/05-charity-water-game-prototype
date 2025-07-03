@@ -124,3 +124,154 @@ const waterJourneyStages = [
   }
 ];
 
+let currentStage = 0;
+let waterIndex = 0;
+let gameStarted = false;
+
+// Helper function to clear the game container
+function clearGameContainer() {
+  const container = document.querySelector('.game-container');
+  container.innerHTML = '';
+}
+
+// Function to render the stage UI
+function renderStageUI() {
+  const container = document.querySelector('.game-container');
+  container.innerHTML = `
+    <div id="stage-label" style="margin-bottom: 12px;"></div>
+    <div id="question-text" style="margin-bottom: 18px;"></div>
+    <button class="choice-button" data-choice="0"></button>
+    <button class="choice-button" data-choice="1"></button>
+    <button class="choice-button" data-choice="2"></button>
+    <div id="water-index" style="margin-top: 18px;"></div>
+  `;
+}
+
+// Function to load a stage
+function loadStage(index) {
+  const stage = waterJourneyStages[index];
+  document.getElementById('question-text').textContent = stage.question;
+  const buttons = document.querySelectorAll('.choice-button');
+  // Show/hide buttons based on number of options
+  buttons.forEach((btn, i) => {
+    if (stage.options[i]) {
+      btn.style.display = '';
+      btn.textContent = `${String.fromCharCode(65 + i)}: ${stage.options[i].label}`;
+    } else {
+      btn.style.display = 'none';
+    }
+  });
+
+  document.getElementById('stage-label').textContent = `Stage ${index + 1}/10`;
+  document.getElementById('water-index').textContent = `Village Water Index: ${waterIndex}%`;
+}
+
+// Function to handle end of game
+function endGame() {
+  document.querySelector('.game-container').innerHTML = `
+    <h2>You've completed the journey!</h2>
+    <p>Your final Village Water Index: ${waterIndex}%</p>
+    <p>Thank you for playing and learning about clean water!</p>
+  `;
+}
+
+// Helper function to show a Bootstrap-style alert above the buttons
+function showAlertAboveButtons(message, type = "info") {
+  // Remove any existing alert
+  const oldAlert = document.getElementById('journey-alert');
+  if (oldAlert) {
+    oldAlert.remove();
+  }
+  // Create a new alert div
+  const alertDiv = document.createElement('div');
+  alertDiv.id = 'journey-alert';
+  alertDiv.className = `alert alert-${type}`;
+  alertDiv.style.margin = "16px 0";
+  alertDiv.style.padding = "12px";
+  alertDiv.style.border = "2px solid #2E9DF7";
+  alertDiv.style.background = "#eaf6fd";
+  alertDiv.style.color = "#063970";
+  alertDiv.style.borderRadius = "8px";
+  alertDiv.style.fontSize = "1rem";
+  alertDiv.style.fontFamily = "'Press Start 2P', Arial, Helvetica, sans-serif";
+  alertDiv.style.textAlign = "center";
+  alertDiv.textContent = message;
+
+  // Insert the alert above the first button
+  const firstButton = document.querySelector('.choice-button');
+  if (firstButton && firstButton.parentNode) {
+    firstButton.parentNode.insertBefore(alertDiv, firstButton);
+  }
+
+  // Remove alert after 1.5 seconds
+  setTimeout(() => {
+    if (alertDiv.parentNode) {
+      alertDiv.parentNode.removeChild(alertDiv);
+    }
+  }, 1500);
+}
+
+// Update the attachChoiceButtonListeners function to avoid stacking event listeners
+function attachChoiceButtonListeners() {
+  // Select all choice buttons
+  const buttons = document.querySelectorAll('.choice-button');
+  // Loop through each button
+  buttons.forEach((button) => {
+    // Remove any old event listeners by replacing the button with a clone
+    const newButton = button.cloneNode(true);
+    button.parentNode.replaceChild(newButton, button);
+
+    // Enable the button for the new stage
+    newButton.disabled = false;
+
+    // Add a click event listener to the new button
+    newButton.addEventListener('click', (e) => {
+      // Get the choice number from the button's data attribute
+      const choice = parseInt(e.target.dataset.choice);
+      // Check if the selected option is correct
+      const isCorrect = waterJourneyStages[currentStage].options[choice].correct;
+
+      // Show feedback using a Bootstrap-style alert above the buttons
+      if (isCorrect) {
+        waterIndex += 10;
+        showAlertAboveButtons("Correct! You chose the sustainable option.", "success");
+      } else {
+        if (waterIndex > 0) {
+          waterIndex -= 10;
+        }
+        showAlertAboveButtons("Hmm... That might not help long-term.", "warning");
+      }
+
+      // Disable all buttons after a choice is made
+      document.querySelectorAll('.choice-button').forEach(btn => btn.disabled = true);
+
+      // Move to the next stage after a short delay
+      currentStage++;
+      if (currentStage < waterJourneyStages.length) {
+        setTimeout(() => {
+          loadStage(currentStage);
+          attachChoiceButtonListeners(); // Attach listeners again for new buttons
+        }, 1500);
+      } else {
+        setTimeout(endGame, 1500);
+      }
+    });
+  });
+}
+
+// Start button event listener
+document.getElementById('startGameButton').addEventListener('click', () => {
+  if (gameStarted) return; // Prevent multiple starts
+  gameStarted = true;
+
+  // Reset the stage and score for a new game
+  currentStage = 0;
+  waterIndex = 0;
+
+  // Render the stage UI and set up event listeners
+  renderStageUI();
+  loadStage(currentStage);
+  attachChoiceButtonListeners(); // <-- Attach listeners for the first stage
+});
+
+// Do not start the game automatically on page load
