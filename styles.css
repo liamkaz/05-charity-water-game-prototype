@@ -13,3 +13,84 @@ Secondary Colors:
 - Pink:       #F16061
 
 */
+
+/* Set a simple, readable font for the whole page */
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #f5f5f5;
+  margin: 0;
+  padding: 0;
+}
+
+/* Center the main game container */
+.game-container {
+  background: #fff;
+  max-width: 400px;
+  margin: 40px auto;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(46, 157, 247, 0.08);
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Header bar at the top */
+.header {
+  width: 100%;
+  background: #2E9DF7;
+  color: #fff;
+  text-align: center;
+  padding: 20px 0;
+  border-radius: 16px 16px 0 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  margin-bottom: 24px;
+}
+
+/* Start button styling */
+.start-btn {
+  background: #FFC907;
+  color: #222;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 36px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 24px;
+  transition: background 0.2s;
+}
+
+.start-btn:hover {
+  background: #ffdb4d;
+}
+
+/* For game instructions or status */
+.instructions, .status {
+  margin: 16px 0;
+  color: #2E9DF7;
+  font-size: 1rem;
+  text-align: center;
+}
+
+/* For score or progress display */
+.score {
+  font-size: 1.2rem;
+  color: #4FCB53;
+  margin: 12px 0;
+  font-weight: bold;
+}
+
+/* Responsive for mobile */
+@media (max-width: 500px) {
+  .game-container {
+    max-width: 95vw;
+    padding: 16px 4vw;
+  }
+  .header {
+    font-size: 1.1rem;
+    padding: 14px 0;
+  }
+}
