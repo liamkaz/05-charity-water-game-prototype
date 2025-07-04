@@ -293,6 +293,58 @@ function updateWaterIndexColor() {
   }
 }
 
+// Function to create simple confetti using DOM elements
+function showConfetti() {
+  // Create a container for confetti
+  const confettiContainer = document.createElement('div');
+  confettiContainer.id = 'confetti-container';
+  confettiContainer.style.position = 'fixed';
+  confettiContainer.style.left = '0';
+  confettiContainer.style.top = '0';
+  confettiContainer.style.width = '100vw';
+  confettiContainer.style.height = '100vh';
+  confettiContainer.style.pointerEvents = 'none';
+  confettiContainer.style.zIndex = '9999';
+
+  // Add 50 confetti pieces
+  for (let i = 0; i < 50; i++) {
+    const confetti = document.createElement('div');
+    // Random position and color
+    const left = Math.random() * 100;
+    const delay = Math.random() * 1;
+    const duration = 2 + Math.random() * 2;
+    const size = 8 + Math.random() * 8;
+    const colors = ['#2E9DF7', '#FFD700', '#FF69B4', '#32CD32', '#FF4500', '#00CED1'];
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    confetti.style.position = 'absolute';
+    confetti.style.left = `${left}vw`;
+    confetti.style.top = '-20px';
+    confetti.style.width = `${size}px`;
+    confetti.style.height = `${size * 0.6}px`;
+    confetti.style.background = color;
+    confetti.style.borderRadius = '3px';
+    confetti.style.opacity = '0.8';
+    confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+    // Animation using CSS
+    confetti.style.transition = `top ${duration}s linear ${delay}s, opacity 0.5s`;
+    setTimeout(() => {
+      confetti.style.top = '90vh';
+      confetti.style.opacity = '0';
+    }, 100); // Start animation after adding to DOM
+    confettiContainer.appendChild(confetti);
+  }
+
+  // Add confetti to the body
+  document.body.appendChild(confettiContainer);
+
+  // Remove confetti after 4 seconds
+  setTimeout(() => {
+    if (confettiContainer.parentNode) {
+      confettiContainer.parentNode.removeChild(confettiContainer);
+    }
+  }, 4000);
+}
+
 // Function to handle end of game
 function endGame() {
   // Show the final score with a span for coloring
@@ -303,6 +355,11 @@ function endGame() {
   `;
   // Update the color of the final water index
   updateFinalWaterIndexColor();
+
+  // Show confetti if the player did well (70% or higher)
+  if (waterIndex >= 70) {
+    showConfetti(); // Show celebration confetti!
+  }
 }
 
 // Helper function to color the final water index at the end screen

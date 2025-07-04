@@ -213,8 +213,8 @@ h1 {
 /* Reset button in the top left corner, only shows the image */
 #resetGameButton {
   position: fixed;
-  top: 34px;
-  left: 34px;
+  top: 12px;
+  left: 12px;
   background: none;
   border: none;
   padding: 0;
@@ -253,14 +253,6 @@ h1 {
   box-shadow: 0 2px #111;
   letter-spacing: 1px;
   transition: background 0.2s, color 0.2s, border-color 0.2s;
-}
-
-/* Hover effect for the reset button */
-#resetGameButton:hover,
-#resetGameButton:focus {
-  background: #f0f0f0;
-  border: 2px solid #2E9DF7;
-  outline: none;
 }
 
 #resetGameButton:hover .reset-text,
@@ -381,30 +373,42 @@ h1 {
   #stage-label {
     font-size: 0.7rem !important;
   }
+  /* Change: Fix reset button to bottom right on mobile */
   #resetGameButton {
-    position: static; /* Not fixed on mobile */
-    margin-top: auto; /* Pushes to bottom */
-    width: 100%;
-    font-size: 0.45rem;
+    position: static;      /* Use absolute positioning on mobile */
+    top: 12px;               /* Place near the top */
+    left: 12px;              /* Place near the left */
+    margin-top: 0;
+    width: auto;
     padding: 8px 8px;
-    max-width: 100vw;
+    max-width: 90vw;
     right: auto;
     bottom: auto;
-    z-index: auto;
+    z-index: 2000;
     box-shadow: none;
+    background: none;
+    display: flex;
+    flex-direction: column;   /* Stack image and text vertically */
+    align-items: center;      /* Center both image and text */
   }
   #resetGameButton img {
-    height: 48px;    /* Larger on mobile too */
+    height: 48px;
     width: auto;
     max-width: none;
   }
   #resetGameButton .reset-text {
-    font-size: 1rem; /* Increased from 0.7rem */
+    font-size: 1rem;
     padding: 4px 10px;
+    margin-left: 0;
+    margin-top: 8px;
+    align-self: center;
+    width: max-content;
+    text-align: center;
+    display: inline-block
   }
   .choice-row {
     margin-bottom: 18px;
-    flex-wrap: nowrap; /* Prevent wrapping on mobile too */
+    flex-wrap: nowrap;
   }
   .choice-img {
     width: 64px;
