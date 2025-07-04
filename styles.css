@@ -318,6 +318,13 @@ h1 {
   margin-bottom: 18px !important;
 }
 
+/* Add this near the top or with your layout styles */
+.main-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
 /* Responsive for mobile: shrink images and keep layout */
 @media (max-width: 600px) {
   .game-container {
@@ -350,11 +357,17 @@ h1 {
     max-width: 45vw;
   }
   .corner-info {
+    position: static; /* Not fixed on mobile */
+    margin-top: auto; /* Pushes to bottom */
+    width: 100%;
     font-size: 0.45rem;
     padding: 8px 8px;
-    max-width: 98vw;
-    left: 2vw;
-    bottom: 1vw;
+    max-width: 100vw;
+    left: auto;
+    bottom: auto;
+    z-index: auto;
+    box-shadow: none;
+    text-align: left;
   }
   /* Make the progress bar smaller on mobile */
   .progress-bar-container {

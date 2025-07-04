@@ -8,29 +8,31 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
 </head>
 <body>
-    <!-- Reset button in the top left corner, outside .game-container -->
-    <button id="resetGameButton" style="display: none; position: fixed; top: 12px; left: 12px; background: none; border: none; padding: 0; z-index: 2000; cursor: pointer; align-items: center;">
-        <img src="img/reset.png" alt="Reset" style="height: 32px; vertical-align: middle;">
-        <span class="reset-text">Reset</span>
-    </button>
-    <!-- Logo and title container -->
-    <div class="charity-water-header">
-        <!-- Charity: water logo -->
-        <img src="img/water-can-transparent.png" alt="charity: water logo" class="charity-water-logo">
-        <!-- Charity: water text -->
-        <div class="charity-water-title">charity: water</div>
-    </div>
-    <div class="game-container">
-        <h1>Charity Water Game Prototype</h1>
-        <button id="startGameButton" class="start-btn pixel-btn">Start Game</button>
-        <p>Click the button above to start the game.</p>
-        <p class="note-text">Note: This is a prototype and does not include all game features.</p>
-    </div>
-    <div class="corner-info">
-        <p>Game Version: 0.1.0</p>
-        <p>Last Updated: July 2025</p>
-        <p>Developed by: Liam Kaznelson</p>
-        <p>For more information, visit <a href="https://www.charitywater.org/" target="_blank">charitywater.org</a>.</p>
+    <div class="main-content-wrapper">
+        <!-- Reset button in the top left corner, outside .game-container -->
+        <button id="resetGameButton" style="display: none; position: fixed; top: 12px; left: 12px; background: none; border: none; padding: 0; z-index: 2000; cursor: pointer; align-items: center;">
+            <img src="img/reset.png" alt="Reset" style="height: 32px; vertical-align: middle;">
+            <span class="reset-text">Reset</span>
+        </button>
+        <!-- Logo and title container -->
+        <div class="charity-water-header">
+            <!-- Charity: water logo -->
+            <img src="img/water-can-transparent.png" alt="charity: water logo" class="charity-water-logo">
+            <!-- Charity: water text -->
+            <div class="charity-water-title">charity: water</div>
+        </div>
+        <div class="game-container">
+            <h1>Charity Water Game Prototype</h1>
+            <button id="startGameButton" class="start-btn pixel-btn">Start Game</button>
+            <p>Click the button above to start the game.</p>
+            <p class="note-text">Note: This is a prototype and does not include all game features.</p>
+        </div>
+        <div class="corner-info">
+            <p>Game Version: 0.1.0</p>
+            <p>Last Updated: July 2025</p>
+            <p>Developed by: Liam Kaznelson</p>
+            <p>For more information, visit <a href="https://www.charitywater.org/" target="_blank">charitywater.org</a>.</p>
+        </div>
     </div>
     <script src="script.js"></script>
 </body>
