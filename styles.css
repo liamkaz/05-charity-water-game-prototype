@@ -404,7 +404,7 @@ h1 {
     align-self: center;
     width: max-content;
     text-align: center;
-    display: inline-block
+    display: inline-block;
   }
   .choice-row {
     margin-bottom: 18px;
