@@ -21,8 +21,6 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
-  /* Prevent scrolling */
-  overflow: hidden;
 }
 
 body {
@@ -173,7 +171,7 @@ h1 {
 
 /* Charity: water header styles */
 .charity-water-header {
-  position: absolute;
+  position: fixed; /* Changed from absolute to fixed */
   top: 8px;
   right: 10px;
   display: flex;
@@ -212,7 +210,100 @@ h1 {
   transition: width 0.7s ease;
 }
 
-/* Responsive for mobile */
+/* Reset button in the top left corner, only shows the image */
+#resetGameButton {
+  position: fixed;
+  top: 34px;
+  left: 34px;
+  background: none;
+  border: none;
+  padding: 0;
+  z-index: 2000;
+  cursor: pointer;
+  box-shadow: none;
+  outline: none;
+  /* For smooth transition on hover */
+  transition: background 0.2s, border 0.2s;
+  display: none; /* JS toggles this */
+  /* Use flex to align image and text */
+  display: flex;
+  align-items: center;
+}
+
+#resetGameButton img {
+  height: 72px !important;      /* Make the reset image larger */
+  width: auto;       /* Maintain aspect ratio */
+  max-width: none;   /* Allow image to grow as needed */
+  display: block;
+  pointer-events: none;
+  transition: filter 0.2s;
+}
+
+/* Hidden by default, shown on hover */
+#resetGameButton .reset-text {
+  display: none;
+  margin-left: 8px;
+  color: #2E9DF7;
+  font-size: 1.3rem; /* Increased from 1rem */
+  font-family: 'Press Start 2P', Arial, Helvetica, sans-serif;
+  background: #fff;
+  border: 2px solid #2E9DF7;
+  border-radius: 6px;
+  padding: 6px 16px; /* Slightly larger padding */
+  box-shadow: 0 2px #111;
+  letter-spacing: 1px;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+/* Hover effect for the reset button */
+#resetGameButton:hover,
+#resetGameButton:focus {
+  background: #f0f0f0;
+  border: 2px solid #2E9DF7;
+  outline: none;
+}
+
+#resetGameButton:hover .reset-text,
+#resetGameButton:focus .reset-text {
+  display: inline-block;
+}
+
+/* Make choice images larger and keep them side by side with buttons */
+.choice-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 28px; /* Increased from 16px for more space */
+  /* Prevent wrapping so image and button stay side by side */
+  flex-wrap: wrap;
+}
+
+/* Make the images bigger and keep their aspect ratio */
+.choice-img {
+  display: none;
+  width: 120px !important;      /* Larger width for better visibility */
+  height: 120px !important;     /* Larger height for better visibility */
+  max-width: 120px !important;
+  max-height: 120px !important;
+  margin-right: 16px;
+  border-radius: 8px;
+  object-fit: contain; /* Keep image aspect ratio */
+}
+
+/* Show the image when the row is hovered or focused */
+.choice-row:hover .choice-img,
+.choice-row:focus-within .choice-img {
+  display: block;
+}
+
+/* Make sure the button stays at a reasonable size next to the image */
+.choice-button {
+  flex: 1 1 0;
+  min-width: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* Responsive for mobile: shrink images and keep layout */
 @media (max-width: 600px) {
   .game-container {
     max-width: 95vw;
@@ -229,6 +320,7 @@ h1 {
   .charity-water-header {
     top: 4px;
     right: 8px;
+    position: fixed; /* Ensure fixed on mobile too */
   }
   .charity-water-logo {
     height: 36px;
@@ -260,5 +352,28 @@ h1 {
   }
   #stage-label {
     font-size: 0.7rem !important;
+  }
+  #resetGameButton {
+    top: 6px;
+    left: 6px;
+  }
+  #resetGameButton img {
+    height: 48px;    /* Larger on mobile too */
+    width: auto;
+    max-width: none;
+  }
+  #resetGameButton .reset-text {
+    font-size: 1rem; /* Increased from 0.7rem */
+    padding: 4px 10px;
+  }
+  .choice-img {
+    width: 64px;
+    height: 64px;
+    max-width: 64px;
+    max-height: 64px;
+    margin-right: 8px;
+  }
+  .choice-row {
+    margin-bottom: 18px; /* Add more space between buttons on mobile too */
   }
 }
