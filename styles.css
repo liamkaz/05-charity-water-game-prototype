@@ -21,6 +21,8 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
+  /* Prevent scrolling */
+  overflow: hidden;
 }
 
 body {
@@ -169,33 +171,11 @@ h1 {
   opacity: 0.85;
 }
 
-/* Responsive for mobile */
-@media (max-width: 500px) {
-  .game-container {
-    max-width: 95vw;
-    padding: 16px 4vw;
-  }
-  .header {
-    font-size: 1.1rem;
-    padding: 14px 0;
-  }
-}
-
-@media (max-width: 600px) {
-  .corner-info {
-    font-size: 0.55rem;
-    padding: 8px 8px;
-    max-width: 98vw;
-    left: 2vw;
-    bottom: 2vw;
-  }
-}
-
 /* Charity: water header styles */
 .charity-water-header {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 8px;
+  right: 10px;
   display: flex;
   align-items: center;
   z-index: 1000;
@@ -211,4 +191,74 @@ h1 {
   font-size: 1em;
   /* Add text shadow for better visibility if needed */
   /* text-shadow: 1px 1px 4px rgba(0,0,0,0.5); */
+}
+
+/* Simple progress bar styles */
+.progress-bar-container {
+  width: 100%;
+  max-width: 400px;
+  height: 18px;
+  background: #eaf6fd;
+  border: 2px solid #2E9DF7;
+  border-radius: 10px;
+  margin: 24px auto 0 auto;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #2E9DF7 70%, #FFC907 100%);
+  transition: width 0.7s ease;
+}
+
+/* Responsive for mobile */
+@media (max-width: 600px) {
+  .game-container {
+    max-width: 95vw;
+    padding: 64px 0;
+    font-size: 0.75rem; /* Make text smaller on mobile */
+  }
+  .header {
+    font-size: 1.1rem;
+    padding: 14px 0;
+  }
+  .note-text {
+    font-size: 0.7rem;
+  }
+  .charity-water-header {
+    top: 4px;
+    right: 8px;
+  }
+  .charity-water-logo {
+    height: 36px;
+  }
+  .charity-water-title {
+    font-size: 0.9em;
+  }
+  .start-btn,
+  .choice-button {
+    padding: 14px 24px;
+    font-size: 0.9rem;
+    max-width: 45vw;
+  }
+  .corner-info {
+    font-size: 0.45rem;
+    padding: 8px 8px;
+    max-width: 98vw;
+    left: 2vw;
+    bottom: 1vw;
+  }
+  /* Make the progress bar smaller on mobile */
+  .progress-bar-container {
+    max-width: 95vw;
+    height: 14px;
+    margin: 16px auto 0 auto;
+  }
+  .progress-bar-fill {
+    height: 100%;
+  }
+  #stage-label {
+    font-size: 0.7rem !important;
+  }
 }

@@ -137,8 +137,51 @@ function clearGameContainer() {
 // Function to render the stage UI
 function renderStageUI() {
   const container = document.querySelector('.game-container');
+  // Add a label above the progress bar for clarity
   container.innerHTML = `
-    <div id="stage-label" style="margin-bottom: 12px;"></div>
+    <div style="
+      color: white;
+      font-size: 1.5rem;
+      font-family: 'Press Start 2P', Arial, Helvetica, sans-serif;
+      margin-bottom: 4px;
+      text-align: center;
+    ">Journey Progress</div>
+    <div class="progress-bar-container" style="
+      width: 100%;
+      max-width: 400px;
+      height: 28px;
+      background: #eaf6fd;
+      border: 2px solid #154c79;
+      border-radius: 10px;
+      margin: 18px auto 18px auto;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    ">
+      <div class="progress-bar-fill" id="progressBarFill" style="
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #2E9DF7 70%, #154c79 100%);
+        transition: width 0.7s ease;
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 1;
+      "></div>
+      <span id="stage-label" style="
+        position: relative;
+        z-index: 2;
+        color: #063970;
+        font-size: 1rem;
+        font-family: 'Press Start 2P', Arial, Helvetica, sans-serif;
+        width: 100%;
+        text-align: center;
+        pointer-events: none;
+        user-select: none;
+      "></span>
+    </div>
     <div id="question-text" style="margin-bottom: 18px;"></div>
     <button class="choice-button" data-choice="0"></button>
     <button class="choice-button" data-choice="1"></button>
@@ -162,6 +205,7 @@ function loadStage(index) {
     }
   });
 
+  // Update the stage label inside the progress bar
   document.getElementById('stage-label').textContent = `Stage ${index + 1}/10`;
   document.getElementById('water-index').textContent = `Village Water Index: ${waterIndex}%`;
 }
@@ -234,12 +278,21 @@ function attachChoiceButtonListeners() {
       // Show feedback using a Bootstrap-style alert above the buttons
       if (isCorrect) {
         waterIndex += 10;
-        showAlertAboveButtons("Correct! You chose the sustainable option.", "success");
+        showAlertAboveButtons("Correct!", "success");
+        setTimeout(() => {
+            showAlertAboveButtons(waterJourneyStages[currentStage].fact.info, "info");
+          }, 1000);
       } else {
         if (waterIndex > 0) {
           waterIndex -= 10;
         }
-        showAlertAboveButtons("Hmm... That might not help long-term.", "warning");
+        showAlertAboveButtons("Not quite...", "warning");
+        setTimeout(() => {
+          showAlertAboveButtons("The correct answer should be " + waterJourneyStages[currentStage].options.find(opt => opt.correct).label, "warning");
+        }, 1000);
+        setTimeout(() => {
+          showAlertAboveButtons(waterJourneyStages[currentStage].fact.info, "info");
+        }, 1000);
       }
 
       // Disable all buttons after a choice is made
@@ -247,6 +300,7 @@ function attachChoiceButtonListeners() {
 
       // Move to the next stage after a short delay
       currentStage++;
+      updateProgressBar(); // Update the progress bar
       if (currentStage < waterJourneyStages.length) {
         setTimeout(() => {
           loadStage(currentStage);
@@ -257,6 +311,18 @@ function attachChoiceButtonListeners() {
       }
     });
   });
+}
+
+// Update the progress bar based on the current stage
+function updateProgressBar() {
+  // Get the progress bar fill element inside the game container
+  const progressBar = document.getElementById('progressBarFill');
+  // Calculate progress as a percentage
+  const percent = ((currentStage) / waterJourneyStages.length) * 100;
+  // Set the width of the fill if the progress bar exists
+  if (progressBar) {
+    progressBar.style.width = `${percent}%`;
+  }
 }
 
 // Start button event listener
@@ -272,6 +338,8 @@ document.getElementById('startGameButton').addEventListener('click', () => {
   renderStageUI();
   loadStage(currentStage);
   attachChoiceButtonListeners(); // <-- Attach listeners for the first stage
+
+  updateProgressBar(); // Initialize progress bar
 });
 
 // Do not start the game automatically on page load
