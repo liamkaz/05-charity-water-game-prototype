@@ -168,7 +168,7 @@ function startGameHandler() {
 // Function to render the stage UI
 function renderStageUI() {
   const container = document.querySelector('.game-container');
-  // Add a label above the progress bar for clarity
+  // Add a dedicated alert container above the choices
   container.innerHTML = `
     <div style="
       color: white;
@@ -214,6 +214,7 @@ function renderStageUI() {
       "></span>
     </div>
     <div id="question-text" style="margin-bottom: 18px;"></div>
+    <div id="alert-container"></div>
     <!-- Each choice-row contains an image and a button. The image is hidden by default and shown on button hover. -->
     <div class="choice-row" style="display: flex; align-items: center; margin-bottom: 8px;">
       <img id="choice-img-0" class="choice-img" style="width: 48px; height: 48px; margin-right: 8px; display: none;" alt="">
@@ -231,19 +232,15 @@ function renderStageUI() {
   `;
 
   // Add event listeners to show/hide images on button hover
-  // Loop through each choice button and its corresponding image
+  // We will later disable these when a choice is made
   for (let i = 0; i < 3; i++) {
     const btn = container.querySelector(`.choice-button[data-choice="${i}"]`);
     const img = container.querySelector(`#choice-img-${i}`);
     if (btn && img) {
-      // When mouse enters the button, show the image
-      btn.addEventListener('mouseenter', () => {
-        img.style.display = '';
-      });
-      // When mouse leaves the button, hide the image
-      btn.addEventListener('mouseleave', () => {
-        img.style.display = 'none';
-      });
+      btn._mouseenterHandler = () => { img.style.display = ''; };
+      btn._mouseleaveHandler = () => { img.style.display = 'none'; };
+      btn.addEventListener('mouseenter', btn._mouseenterHandler);
+      btn.addEventListener('mouseleave', btn._mouseleaveHandler);
     }
   }
 }
@@ -290,11 +287,13 @@ function endGame() {
 
 // Helper function to show a Bootstrap-style alert above the buttons
 function showAlertAboveButtons(message, type = "info") {
+  // Use the dedicated alert container
+  const alertContainer = document.getElementById('alert-container');
+  if (!alertContainer) return;
+
   // Remove any existing alert
-  const oldAlert = document.getElementById('journey-alert');
-  if (oldAlert) {
-    oldAlert.remove();
-  }
+  alertContainer.innerHTML = '';
+
   // Create a new alert div
   const alertDiv = document.createElement('div');
   alertDiv.id = 'journey-alert';
@@ -310,11 +309,8 @@ function showAlertAboveButtons(message, type = "info") {
   alertDiv.style.textAlign = "center";
   alertDiv.textContent = message;
 
-  // Insert the alert above the first button
-  const firstButton = document.querySelector('.choice-button');
-  if (firstButton && firstButton.parentNode) {
-    firstButton.parentNode.insertBefore(alertDiv, firstButton);
-  }
+  // Add the alert to the alert container
+  alertContainer.appendChild(alertDiv);
 
   // Remove alert after 1.5 seconds
   setTimeout(() => {
@@ -344,6 +340,23 @@ function attachChoiceButtonListeners() {
 
       // Disable all buttons after a choice is made
       document.querySelectorAll('.choice-button').forEach(btn => btn.disabled = true);
+
+      // Hide all images and remove their hover event listeners so they can't appear
+      for (let i = 0; i < 3; i++) {
+        const btn = document.querySelector(`.choice-button[data-choice="${i}"]`);
+        const img = document.getElementById(`choice-img-${i}`);
+        if (img) {
+          img.style.display = 'none';
+        }
+        if (btn && btn._mouseenterHandler && btn._mouseleaveHandler) {
+          btn.removeEventListener('mouseenter', btn._mouseenterHandler);
+          btn.removeEventListener('mouseleave', btn._mouseleaveHandler);
+        }
+        // Restore the parent .choice-row display to default (flex)
+        if (btn && btn.parentNode && btn.parentNode.classList.contains('choice-row')) {
+          btn.parentNode.style.display = 'flex';
+        }
+      }
 
       if (isCorrect) {
         waterIndex += 10;
@@ -426,4 +439,5 @@ document.getElementById('resetGameButton').addEventListener('click', () => {
   setResetButtonVisibility(false);
 });
 
+// Do not start the game automatically on page load
 // Do not start the game automatically on page load

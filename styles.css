@@ -274,7 +274,11 @@ h1 {
   align-items: center;
   margin-bottom: 28px; /* Increased from 16px for more space */
   /* Prevent wrapping so image and button stay side by side */
-  flex-wrap: wrap;
+  flex-wrap: nowrap;      /* Prevent wrapping */
+  position: relative;
+  /* Ensure stacking context for z-index */
+  z-index: 1;
+  min-width: 0;           /* Prevent flex children from overflowing */
 }
 
 /* Make the images bigger and keep their aspect ratio */
@@ -287,6 +291,8 @@ h1 {
   margin-right: 16px;
   border-radius: 8px;
   object-fit: contain; /* Keep image aspect ratio */
+  z-index: 5;
+  flex-shrink: 0;         /* Prevent image from shrinking or wrapping */
 }
 
 /* Show the image when the row is hovered or focused */
@@ -301,6 +307,15 @@ h1 {
   min-width: 0;
   margin-top: 0;
   margin-bottom: 0;
+}
+
+/* Make sure alerts appear above everything and images never push alerts down */
+.alert {
+  position: relative;
+  z-index: 100;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 18px !important;
 }
 
 /* Responsive for mobile: shrink images and keep layout */
@@ -366,14 +381,16 @@ h1 {
     font-size: 1rem; /* Increased from 0.7rem */
     padding: 4px 10px;
   }
+  .choice-row {
+    margin-bottom: 18px;
+    flex-wrap: nowrap; /* Prevent wrapping on mobile too */
+  }
   .choice-img {
     width: 64px;
     height: 64px;
     max-width: 64px;
     max-height: 64px;
     margin-right: 8px;
-  }
-  .choice-row {
-    margin-bottom: 18px; /* Add more space between buttons on mobile too */
+    flex-shrink: 0;
   }
 }
