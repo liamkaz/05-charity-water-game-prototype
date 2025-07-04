@@ -304,16 +304,16 @@ function showConfetti() {
   confettiContainer.style.width = '100vw';
   confettiContainer.style.height = '100vh';
   confettiContainer.style.pointerEvents = 'none';
-  confettiContainer.style.zIndex = '9999';
+  confettiContainer.style.zIndex = '10000'; // Make sure it's above everything
 
-  // Add 50 confetti pieces
-  for (let i = 0; i < 50; i++) {
+  // Add 80 confetti pieces for a bigger effect
+  for (let i = 0; i < 80; i++) {
     const confetti = document.createElement('div');
     // Random position and color
     const left = Math.random() * 100;
     const delay = Math.random() * 1;
-    const duration = 2 + Math.random() * 2;
-    const size = 8 + Math.random() * 8;
+    const duration = 3 + Math.random() * 2; // Longer duration
+    const size = 12 + Math.random() * 12;   // Bigger size
     const colors = ['#2E9DF7', '#FFD700', '#FF69B4', '#32CD32', '#FF4500', '#00CED1'];
     const color = colors[Math.floor(Math.random() * colors.length)];
     confetti.style.position = 'absolute';
@@ -326,23 +326,31 @@ function showConfetti() {
     confetti.style.opacity = '0.8';
     confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
     // Animation using CSS
-    confetti.style.transition = `top ${duration}s linear ${delay}s, opacity 0.5s`;
+    confetti.style.transition = `top ${duration}s linear ${delay}s`;
+
+    // Start the falling animation
     setTimeout(() => {
       confetti.style.top = '90vh';
+    }, 100);
+
+    // After the falling animation is done, fade out the confetti
+    setTimeout(() => {
+      confetti.style.transition = 'opacity 0.7s'; // Fade out over 0.7 seconds
       confetti.style.opacity = '0';
-    }, 100); // Start animation after adding to DOM
+    }, (duration + delay) * 1000); // Wait for fall to finish
+
     confettiContainer.appendChild(confetti);
   }
 
   // Add confetti to the body
   document.body.appendChild(confettiContainer);
 
-  // Remove confetti after 4 seconds
+  // Remove confetti after 6 seconds (longer)
   setTimeout(() => {
     if (confettiContainer.parentNode) {
       confettiContainer.parentNode.removeChild(confettiContainer);
     }
-  }, 4000);
+  }, 6000);
 }
 
 // Function to handle end of game
@@ -515,12 +523,19 @@ function updateProgressBar() {
 function setResetButtonVisibility(visible) {
   const resetButton = document.getElementById('resetGameButton');
   if (resetButton) {
-    resetButton.style.display = visible ? 'block' : 'none';
+    if (visible) {
+      resetButton.classList.remove('hidden'); // Remove 'hidden' class to show
+    }else {
+      resetButton.classList.add('hidden'); // Add 'hidden' class to hide
+    }
   }
 }
 
 // Start button event listener
 document.getElementById('startGameButton').addEventListener('click', startGameHandler);
+
+// Hide the reset button by default when the script loads
+document.getElementById('resetGameButton').classList.add('hidden');
 
 // Reset button event listener
 document.getElementById('resetGameButton').addEventListener('click', () => {

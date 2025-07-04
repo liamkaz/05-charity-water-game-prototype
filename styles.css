@@ -171,7 +171,7 @@ h1 {
 
 /* Charity: water header styles */
 .charity-water-header {
-  position: fixed; /* Changed from absolute to fixed */
+  position: fixed;
   top: 8px;
   right: 10px;
   display: flex;
@@ -224,10 +224,12 @@ h1 {
   outline: none;
   /* For smooth transition on hover */
   transition: background 0.2s, border 0.2s;
-  display: none; /* JS toggles this */
-  /* Use flex to align image and text */
   display: flex;
   align-items: center;
+}
+
+.hidden {
+  display: none !important; /* Hide elements by default */
 }
 
 #resetGameButton img {
@@ -331,10 +333,18 @@ h1 {
   .note-text {
     font-size: 0.7rem;
   }
+  /* Charity: water header in top right, static on mobile */
   .charity-water-header {
-    top: 4px;
+    position: absolute; /* Make absolute on mobile */
+    top: 8px;
     right: 8px;
-    position: fixed; /* Ensure fixed on mobile too */
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* Align to the right */
+    width: auto;
+    margin-top: 0;
+    margin-bottom: 0;
+    z-index: 1000;
   }
   .charity-water-logo {
     height: 36px;
@@ -375,10 +385,11 @@ h1 {
   }
   /* Change: Fix reset button to bottom right on mobile */
   #resetGameButton {
-    position: static;      /* Use absolute positioning on mobile */
-    top: 12px;               /* Place near the top */
-    left: 12px;              /* Place near the left */
+    position: static;
+    top: 8px;
+    left: 8px;
     margin-top: 0;
+    margin-bottom: 0;
     width: auto;
     padding: 8px 8px;
     max-width: 90vw;
@@ -388,8 +399,8 @@ h1 {
     box-shadow: none;
     background: none;
     display: flex;
-    flex-direction: column;   /* Stack image and text vertically */
-    align-items: center;      /* Center both image and text */
+    flex-direction: row;   /* Row for image and text */
+    align-items: center;   /* Center vertically */
   }
   #resetGameButton img {
     height: 48px;
@@ -397,14 +408,19 @@ h1 {
     max-width: none;
   }
   #resetGameButton .reset-text {
+    display: inline-block; /* Show text on mobile */
     font-size: 1rem;
     padding: 4px 10px;
-    margin-left: 0;
-    margin-top: 8px;
+    margin-left: 8px;
+    margin-top: 0;
     align-self: center;
-    width: max-content;
-    text-align: center;
-    display: inline-block;
+  }
+  /* Remove .top-bar-mobile flex container styling if present */
+  .top-bar-mobile {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
   }
   .choice-row {
     margin-bottom: 18px;
