@@ -382,8 +382,16 @@ h1 {
     font-size: 0.7rem !important;
   }
   #resetGameButton {
-    top: 6px;
-    left: 6px;
+    position: static; /* Not fixed on mobile */
+    margin-top: auto; /* Pushes to bottom */
+    width: 100%;
+    font-size: 0.45rem;
+    padding: 8px 8px;
+    max-width: 100vw;
+    right: auto;
+    bottom: auto;
+    z-index: auto;
+    box-shadow: none;
   }
   #resetGameButton img {
     height: 48px;    /* Larger on mobile too */

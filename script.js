@@ -273,16 +273,53 @@ function loadStage(index) {
 
   // Update the stage label inside the progress bar
   document.getElementById('stage-label').textContent = `Stage ${index + 1}/10`;
-  document.getElementById('water-index').textContent = `Village Water Index: ${waterIndex}%`;
+  document.getElementById('water-index').innerHTML = `Village Water Index: <span id="waterIndexValue">${waterIndex}%</span>`;
+  updateWaterIndexColor();
+}
+
+function updateWaterIndexColor() {
+  const waterIndexSpan = document.getElementById('waterIndexValue');
+  if (!waterIndexSpan) return;
+
+  // Change color based on the value
+  if (waterIndex == 100) {
+    waterIndexSpan.style.color = 'lightgreen'; // Good score
+  } else if (waterIndex >= 70) {
+    waterIndexSpan.style.color = 'green';
+  } else if (waterIndex >= 40) {
+    waterIndexSpan.style.color = 'orange'; // Medium score
+  } else {
+    waterIndexSpan.style.color = 'red'; // Low score
+  }
 }
 
 // Function to handle end of game
 function endGame() {
+  // Show the final score with a span for coloring
   document.querySelector('.game-container').innerHTML = `
     <h2>You've completed the journey!</h2>
-    <p>Your final Village Water Index: ${waterIndex}%</p>
+    <p>Your final Village Water Index: <span id="finalWaterIndexValue">${waterIndex}%</span></p>
     <p>Thank you for playing and learning about clean water!</p>
   `;
+  // Update the color of the final water index
+  updateFinalWaterIndexColor();
+}
+
+// Helper function to color the final water index at the end screen
+function updateFinalWaterIndexColor() {
+  const finalSpan = document.getElementById('finalWaterIndexValue');
+  if (!finalSpan) return;
+
+  // Change color based on the value, same logic as updateWaterIndexColor
+  if (waterIndex == 100) {
+    finalSpan.style.color = 'lightgreen';
+  } else if (waterIndex >= 70) {
+    finalSpan.style.color = 'green';
+  } else if (waterIndex >= 40) {
+    finalSpan.style.color = 'orange';
+  } else {
+    finalSpan.style.color = 'red';
+  }
 }
 
 // Helper function to show a Bootstrap-style alert above the buttons
@@ -411,7 +448,7 @@ function updateProgressBar() {
   // Get the progress bar fill element inside the game container
   const progressBar = document.getElementById('progressBarFill');
   // Calculate progress as a percentage
-  const percent = ((currentStage) / waterJourneyStages.length) * 100;
+  const percent = ((currentStage + 1) / waterJourneyStages.length) * 100;
   // Set the width of the fill if the progress bar exists
   if (progressBar) {
     progressBar.style.width = `${percent}%`;
