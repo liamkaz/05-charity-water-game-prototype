@@ -24,7 +24,7 @@ html, body {
 }
 
 body {
-  font-family: 'Press Start 2P', Arial, Helvetica, sans-serif;
+  font-family: 'proxima-nova', Arial, Helvetica, sans-serif;
   background-color: #1e81b0;
   margin: 0;
   padding: 0;
@@ -71,6 +71,31 @@ body::before {
   align-items: center;
   color: #fff;
   text-align: center; /* Center all text inside the container */
+  min-height: 400px; /* Add minimum height for more vertical space */
+  justify-content: center; /* Vertically center content */
+}
+
+/* Add a new class for the start section wrapper */
+.start-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  height: 100%; /* Fill available space */
+  gap: 24px; /* Add space between elements */
+}
+
+/* Make the game container larger on desktop screens */
+@media (min-width: 900px) {
+  .game-container {
+    width: 70vw;           /* Take up more horizontal space */
+    max-width: 900px;      /* Allow a wider max width */
+    min-height: 600px;     /* Increase minimum height */
+    padding: 48px 40px;    /* More padding for a spacious look */
+    margin: 40px auto;     /* Center with more margin */
+    font-size: 1.1rem;     /* Slightly larger text */
+  }
 }
 
 /* Header bar at the top */
@@ -101,10 +126,10 @@ h1 {
   border-radius: 0;
   padding: 18px 40px;
   font-size: 1.1rem;
-  font-family: 'Press Start 2P', Arial, Helvetica, sans-serif;
+  font-family: 'proxima-nova', Arial, Helvetica, sans-serif;
   font-weight: bold;
   cursor: pointer;
-  margin-top: 24px;
+  margin-bottom: 24px;    /* Add bottom margin instead */
   transition: background 0.2s, color 0.2s, border-color 0.2s;
   box-shadow: 0 4px #111, 0 8px #041F3D;
   letter-spacing: 1px;
@@ -247,7 +272,7 @@ h1 {
   margin-left: 8px;
   color: #2E9DF7;
   font-size: 1.3rem; /* Increased from 1rem */
-  font-family: 'Press Start 2P', Arial, Helvetica, sans-serif;
+  font-family: 'proxima-nova', Arial, Helvetica, sans-serif;
   background: #fff;
   border: 2px solid #2E9DF7;
   border-radius: 6px;

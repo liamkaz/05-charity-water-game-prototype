@@ -128,38 +128,126 @@ let currentStage = 0;
 let waterIndex = 0;
 let gameStarted = false;
 
-// Helper function to clear the game container
-function clearGameContainer() {
-  const container = document.querySelector('.game-container');
-  container.innerHTML = '';
+// Checklist state: true if checked, false if not
+let checklistState = [false, false, false];
+// Challenge flags for easier reference
+let challengeTimeLimit = false;
+let challengeRandomEvents = false;
+let challengeHarderPenalties = false;
+
+// Timer variables for the time limit challenge
+let stageTimer = null;
+let stageTimeLeft = 0;
+const STAGE_TIME_LIMIT = 15; // seconds
+
+// Helper function to clear any running timer
+function clearStageTimer() {
+  if (stageTimer) {
+    clearInterval(stageTimer);
+    stageTimer = null;
+  }
+  // Remove timer display if present
+  const timerDiv = document.getElementById('timer-div');
+  if (timerDiv && timerDiv.parentNode) {
+    timerDiv.parentNode.removeChild(timerDiv);
+  }
 }
 
-// Helper function to restore the initial game container content
-function showInitialGameScreen() {
-  const container = document.querySelector('.game-container');
-  container.innerHTML = `
-    <h1>Charity Water Game Prototype</h1>
-    <button id="startGameButton" class="start-btn pixel-btn">Start Game</button>
-    <p>Click the button above to start the game.</p>
-    <p class="note-text">Note: This is a prototype and does not include all game features.</p>
-  `;
-  // Re-attach the start button event listener
-  document.getElementById('startGameButton').addEventListener('click', startGameHandler);
+// Helper function to show the timer
+function showStageTimer(seconds) {
+  // Try to find the timer div
+  let timerDiv = document.getElementById('timer-div');
+  if (!timerDiv) {
+    // If it doesn't exist, create it
+    const container = document.querySelector('.game-container');
+    timerDiv = document.createElement('div');
+    timerDiv.id = 'timer-div';
+    timerDiv.style.margin = '8px 0 12px 0';
+    timerDiv.style.fontSize = '1.1rem';
+    timerDiv.style.color = '#FFC907';
+    timerDiv.style.fontWeight = 'bold';
+    timerDiv.style.textAlign = 'center';
+    // Insert timer above the question
+    const questionDiv = document.getElementById('question-text');
+    if (questionDiv && questionDiv.parentNode) {
+      questionDiv.parentNode.insertBefore(timerDiv, questionDiv);
+    }
+  }
+  // Just update the text
+  timerDiv.textContent = `Time left: ${seconds}s`;
 }
 
-// Extract start game logic to a function so it can be reused
+// Helper function to start the timer for a stage
+function startStageTimer(onTimeout) {
+  stageTimeLeft = STAGE_TIME_LIMIT;
+  showStageTimer(stageTimeLeft);
+
+  // Use setInterval to count down every second
+  stageTimer = setInterval(() => {
+    stageTimeLeft--;
+    if (stageTimeLeft > 0) {
+      showStageTimer(stageTimeLeft);
+    } else {
+      // Show 0 seconds left before timing out
+      showStageTimer(0);
+      clearStageTimer();
+      onTimeout();
+    }
+  }, 1000);
+}
+
+// Helper function for random events
+function maybeTriggerRandomEvent(afterCorrect, callback) {
+  // Only trigger if challenge is enabled and after a correct answer
+  if (!challengeRandomEvents || !afterCorrect) {
+    callback();
+    return;
+  }
+  // 40% chance of random event
+  if (Math.random() < 0.4) {
+    // Pick a random event
+    const events = [
+      {
+        text: "A sudden drought hits! Lose 10% water index.",
+        effect: () => { waterIndex = Math.max(0, waterIndex - 10); }
+      },
+      {
+        text: "A donor is inspired by your work! Gain 10% water index.",
+        effect: () => { waterIndex = Math.min(100, waterIndex + 10); }
+      },
+      {
+        text: "A road is blocked. You must skip the next stage.",
+        effect: () => { currentStage = Math.min(currentStage + 1, waterJourneyStages.length - 1); }
+      }
+    ];
+    const event = events[Math.floor(Math.random() * events.length)];
+    showAlertAboveButtons(event.text, "warning");
+    event.effect();
+    updateWaterIndexColor();
+    setTimeout(callback, 1500);
+  } else {
+    callback();
+  }
+}
+
+// Update startGameHandler to read challenge flags
 function startGameHandler() {
   if (gameStarted) return; // Prevent multiple starts
   gameStarted = true;
+
+  // Read challenge flags from checklistState
+  challengeTimeLimit = checklistState[0];
+  challengeRandomEvents = checklistState[1];
+  challengeHarderPenalties = checklistState[2];
 
   // Reset the stage and score for a new game
   currentStage = 0;
   waterIndex = 0;
 
-  // Render the stage UI and set up event listeners
+  // Render the stage UI
   renderStageUI();
+  // Load the first stage (this will attach listeners)
   loadStage(currentStage);
-  attachChoiceButtonListeners();
 
   updateProgressBar();
   setResetButtonVisibility(true);
@@ -173,10 +261,10 @@ function renderStageUI() {
     <div style="
       color: white;
       font-size: 1.5rem;
-      font-family: 'Press Start 2P', Arial, Helvetica, sans-serif;
+      font-family: 'proxima-nova', Arial, Helvetica, sans-serif;
       margin-bottom: 4px;
       text-align: center;
-    ">Journey Progress</div>
+    "><strong>Journey Progress</strong></div>
     <div class="progress-bar-container" style="
       width: 100%;
       max-width: 400px;
@@ -206,7 +294,7 @@ function renderStageUI() {
         z-index: 2;
         color: #063970;
         font-size: 1rem;
-        font-family: 'Press Start 2P', Arial, Helvetica, sans-serif;
+        font-family: 'proxima-nova', Arial, Helvetica, sans-serif;
         width: 100%;
         text-align: center;
         pointer-events: none;
@@ -245,8 +333,10 @@ function renderStageUI() {
   }
 }
 
-// Function to load a stage
+// Update loadStage to start timer if needed
 function loadStage(index) {
+  clearStageTimer(); // Always clear timer before loading a new stage
+
   const stage = waterJourneyStages[index];
   document.getElementById('question-text').textContent = stage.question;
   const buttons = document.querySelectorAll('.choice-button');
@@ -257,7 +347,6 @@ function loadStage(index) {
       btn.style.display = '';
       btn.textContent = `${String.fromCharCode(65 + i)}: ${stage.options[i].label}`;
       // Set the image source and alt text for each choice
-      // Images are named like "1a.png", "1b.png", etc. in the img directory
       const stageNum = index + 1;
       const choiceLetter = String.fromCharCode(97 + i); // 0 -> 'a', 1 -> 'b', 2 -> 'c'
       img.style.display = '';
@@ -275,22 +364,43 @@ function loadStage(index) {
   document.getElementById('stage-label').textContent = `Stage ${index + 1}/10`;
   document.getElementById('water-index').innerHTML = `Village Water Index: <span id="waterIndexValue">${waterIndex}%</span>`;
   updateWaterIndexColor();
-}
 
-function updateWaterIndexColor() {
-  const waterIndexSpan = document.getElementById('waterIndexValue');
-  if (!waterIndexSpan) return;
-
-  // Change color based on the value
-  if (waterIndex == 100) {
-    waterIndexSpan.style.color = 'lightgreen'; // Good score
-  } else if (waterIndex >= 70) {
-    waterIndexSpan.style.color = 'green';
-  } else if (waterIndex >= 40) {
-    waterIndexSpan.style.color = 'orange'; // Medium score
-  } else {
-    waterIndexSpan.style.color = 'red'; // Low score
+  // If time limit challenge is active, start timer for this stage
+  if (challengeTimeLimit) {
+    startStageTimer(() => {
+      // If time runs out, treat as incorrect answer
+      document.querySelectorAll('.choice-button').forEach(btn => btn.disabled = true);
+      showAlertAboveButtons("Time's up!", "warning");
+      setTimeout(() => {
+        // Show correct answer
+        const correctLabel = waterJourneyStages[currentStage].options.find(opt => opt.correct).label;
+        showAlertAboveButtons(`The correct answer should be "${correctLabel}."`, "warning");
+        // Apply penalty for wrong answer
+        if (challengeHarderPenalties) {
+          waterIndex = Math.max(0, waterIndex - 20);
+        } else if (waterIndex > 0) {
+          waterIndex -= 10;
+        }
+        updateWaterIndexColor();
+        // Show fact, then move to next stage
+        setTimeout(() => {
+          showAlertAboveButtons(waterJourneyStages[currentStage].fact, "info");
+          setTimeout(() => {
+            currentStage++;
+            updateProgressBar();
+            if (currentStage < waterJourneyStages.length) {
+              loadStage(currentStage);
+            } else {
+              endGame();
+            }
+          }, 1500);
+        }, 1500);
+      }, 1000);
+    });
   }
+
+  // Attach event listeners to the current stage's buttons (only once per stage)
+  attachChoiceButtonListeners();
 }
 
 // Function to create simple confetti using DOM elements
@@ -387,6 +497,24 @@ function updateFinalWaterIndexColor() {
   }
 }
 
+// Helper function to color the water index during the game
+function updateWaterIndexColor() {
+  // Get the span that shows the current water index
+  const waterSpan = document.getElementById('waterIndexValue');
+  if (!waterSpan) return;
+
+  // Change color based on the value, same logic as updateFinalWaterIndexColor
+  if (waterIndex == 100) {
+    waterSpan.style.color = 'lightgreen';
+  } else if (waterIndex >= 70) {
+    waterSpan.style.color = 'green';
+  } else if (waterIndex >= 40) {
+    waterSpan.style.color = 'orange';
+  } else {
+    waterSpan.style.color = 'red';
+  }
+}
+
 // Helper function to show a Bootstrap-style alert above the buttons
 function showAlertAboveButtons(message, type = "info") {
   // Use the dedicated alert container
@@ -407,7 +535,7 @@ function showAlertAboveButtons(message, type = "info") {
   alertDiv.style.color = "#063970";
   alertDiv.style.borderRadius = "8px";
   alertDiv.style.fontSize = "1rem";
-  alertDiv.style.fontFamily = "'Press Start 2P', Arial, Helvetica, sans-serif";
+  alertDiv.style.fontFamily = "'proxima-nova', Arial, Helvetica, sans-serif";
   alertDiv.style.textAlign = "center";
   alertDiv.textContent = message;
 
@@ -422,22 +550,32 @@ function showAlertAboveButtons(message, type = "info") {
   }, 1500);
 }
 
+// Helper function to play a sound effect
+function playSoundEffect(src) {
+  // Create a new audio element
+  const audio = new Audio(src);
+  // Play the audio
+  audio.play();
+}
+
 // Update the attachChoiceButtonListeners function to avoid stacking event listeners
 function attachChoiceButtonListeners() {
   // Select all choice buttons
   const buttons = document.querySelectorAll('.choice-button');
   // Loop through each button
   buttons.forEach((button) => {
-    // Remove any old event listeners by replacing the button with a clone
-    const newButton = button.cloneNode(true);
-    button.parentNode.replaceChild(newButton, button);
-
+    // Remove any previous click event by setting onclick to null
+    // This ensures only one click handler is active at a time
+    button.onclick = null;
     // Enable the button for the new stage
-    newButton.disabled = false;
-
-    // Add a click event listener to the new button
-    newButton.addEventListener('click', (e) => {
+    button.disabled = false;
+    // Add a click event handler to the button
+    button.onclick = (e) => {
+      // Stop the timer if running
+      clearStageTimer();
+      // Get which choice was clicked
       const choice = parseInt(e.target.dataset.choice);
+      // Check if the answer is correct
       const isCorrect = waterJourneyStages[currentStage].options[choice].correct;
 
       // Disable all buttons after a choice is made
@@ -450,6 +588,7 @@ function attachChoiceButtonListeners() {
         if (img) {
           img.style.display = 'none';
         }
+        // Remove hover event listeners for images
         if (btn && btn._mouseenterHandler && btn._mouseleaveHandler) {
           btn.removeEventListener('mouseenter', btn._mouseenterHandler);
           btn.removeEventListener('mouseleave', btn._mouseleaveHandler);
@@ -460,26 +599,50 @@ function attachChoiceButtonListeners() {
         }
       }
 
+      // Handle correct answer
       if (isCorrect) {
-        waterIndex += 10;
+        // Play win sound
+        playSoundEffect('audio/win.mp3');
+        waterIndex = Math.min(100, waterIndex + 10);
         showAlertAboveButtons("Correct!", "success");
         // Wait 1 second, then show the fact
         setTimeout(() => {
           showAlertAboveButtons(waterJourneyStages[currentStage].fact, "info");
-          // Wait another 1.5 seconds, then go to the next stage
+          // Wait another 1.5 seconds, then maybe trigger random event, then go to the next stage
           setTimeout(() => {
-            currentStage++;
-            updateProgressBar();
-            if (currentStage < waterJourneyStages.length) {
-              loadStage(currentStage);
-              attachChoiceButtonListeners();
-            } else {
-              endGame();
-            }
+            // If random events are enabled, maybe trigger one after a correct answer
+            maybeTriggerRandomEvent(true, () => {
+              currentStage++;
+              updateProgressBar();
+              // Show halfway alert after finishing stage 5 (index 5, after increment)
+              if (currentStage === 5) {
+                // Show a special alert for halfway mark
+                showAlertAboveButtons("You're halfway through the journey! Keep going!", "success");
+                // Wait 1.5 seconds before loading the next stage
+                setTimeout(() => {
+                  if (currentStage < waterJourneyStages.length) {
+                    loadStage(currentStage);
+                  } else {
+                    endGame();
+                  }
+                }, 1500);
+              } else {
+                if (currentStage < waterJourneyStages.length) {
+                  loadStage(currentStage);
+                } else {
+                  endGame();
+                }
+              }
+            });
           }, 1500); // Wait for the fact message to show
         }, 1000); // Wait for the "Correct!" message to show
       } else {
-        if (waterIndex > 0) {
+        // Play lose sound
+        playSoundEffect('audio/lose.mp3');
+        // Handle wrong answer with penalty
+        if (challengeHarderPenalties) {
+          waterIndex = Math.max(0, waterIndex - 20);
+        } else if (waterIndex > 0) {
           waterIndex -= 10;
         }
         showAlertAboveButtons("Not quite...", "warning");
@@ -492,11 +655,11 @@ function attachChoiceButtonListeners() {
             showAlertAboveButtons(waterJourneyStages[currentStage].fact, "info");
             // Wait another 1.5 seconds, then go to the next stage
             setTimeout(() => {
+              // For wrong answers, random events do NOT trigger (per challenge rules)
               currentStage++;
               updateProgressBar();
               if (currentStage < waterJourneyStages.length) {
                 loadStage(currentStage);
-                attachChoiceButtonListeners();
               } else {
                 endGame();
               }
@@ -504,7 +667,7 @@ function attachChoiceButtonListeners() {
           }, 1500); // Wait for the correct answer message to show
         }, 1000); // Wait for the "Not quite..." message to show
       }
-    });
+    };
   });
 }
 
@@ -531,14 +694,60 @@ function setResetButtonVisibility(visible) {
   }
 }
 
-// Start button event listener
-document.getElementById('startGameButton').addEventListener('click', startGameHandler);
+// Helper function to update checklistState when a checkbox is clicked
+function setupChecklistListeners() {
+  // For each checklist item
+  for (let i = 0; i < checklistState.length; i++) {
+    const checkbox = document.getElementById(`checklist-${i}`);
+    if (checkbox) {
+      // Remove any previous event listener by replacing with a clone
+      const newCheckbox = checkbox.cloneNode(true);
+      checkbox.parentNode.replaceChild(newCheckbox, checkbox);
+      // Set checked property based on checklistState
+      newCheckbox.checked = checklistState[i];
+      // Add event listener
+      newCheckbox.addEventListener('change', (e) => {
+        checklistState[i] = e.target.checked;
+        // For debugging: log the checklist state
+        console.log(`Checklist item ${i} is now ${checklistState[i]}`);
+      });
+    }
+  }
+}
 
-// Hide the reset button by default when the script loads
-document.getElementById('resetGameButton').classList.add('hidden');
+// Helper function to reset checklist state and UI
+function resetChecklist() {
+  checklistState = [false, false, false];
+  for (let i = 0; i < checklistState.length; i++) {
+    const checkbox = document.getElementById(`checklist-${i}`);
+    if (checkbox) {
+      checkbox.checked = false;
+    }
+  }
+}
 
-// Reset button event listener
+// Helper function to clear the game container content
+function clearGameContainer() {
+  // Find the game container and clear its HTML
+  const container = document.querySelector('.game-container');
+  if (container) {
+    container.innerHTML = '';
+  }
+}
+
+// After the DOM is loaded, set up checklist listeners and attach the start button event listener if present
+window.addEventListener('DOMContentLoaded', () => {
+  setupChecklistListeners();
+  // Attach start button event listener if it exists (for initial HTML)
+  const startBtn = document.getElementById('startGameButton');
+  if (startBtn) {
+    startBtn.addEventListener('click', startGameHandler);
+  }
+});
+
+// When the game is reset, also reset the checklist and clear timer
 document.getElementById('resetGameButton').addEventListener('click', () => {
+  clearStageTimer();
   // Clear the game container and reset variables
   clearGameContainer();
   gameStarted = false;
@@ -546,7 +755,42 @@ document.getElementById('resetGameButton').addEventListener('click', () => {
   waterIndex = 0;
   showInitialGameScreen();
   setResetButtonVisibility(false);
+  resetChecklist();
+  setupChecklistListeners();
 });
 
-// Do not start the game automatically on page load
+// When the initial game screen is shown, also set up checklist listeners
+function showInitialGameScreen() {
+  const container = document.querySelector('.game-container');
+  // Add the checklist section to the start screen
+  container.innerHTML = `
+    <div class="start-section">
+      <h1>Charity Water Game Prototype</h1>
+      <button id="startGameButton" class="start-btn pixel-btn">Start Game</button>
+      <p>Click the button above to start the game.</p>
+      <p class="note-text">Note: This is a prototype and does not include all game features.</p>
+    </div>
+    <div id="checklist-section" style="margin-top: 24px; text-align: left;">
+      <h3 style="color: #FFC907;">Current Challenges</h3>
+      <ul style="list-style: none; padding: 0;">
+        <li>
+          <input type="checkbox" id="checklist-0">
+          <label for="checklist-0">Time Limit</label>
+        </li>
+        <li>
+          <input type="checkbox" id="checklist-1">
+          <label for="checklist-1">Random Events</label>
+        </li>
+        <li>
+          <input type="checkbox" id="checklist-2">
+          <label for="checklist-2">Harder Penalties</label>
+        </li>
+      </ul>
+    </div>
+  `;
+  // Re-attach the start button event listener
+  document.getElementById('startGameButton').addEventListener('click', startGameHandler);
+  setupChecklistListeners();
+}
+
 // Do not start the game automatically on page load
